@@ -1,0 +1,14 @@
+virtual/
+virtual2/
+cnn/train_benigna/
+cnn/train_altogrado/
+cnn/train_ascus/
+cnn/train_bajogrado/
+cnn/dataset/
+__pycache__/
+migrations/
+uploads/
+cnn/static/uploads/
+modelo/
+best_mode_effnet.keras
+best_mode_effnet/

@@ -1,0 +1,116 @@
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+		<title>{% block title %}Diagnóstico Celular{% endblock %}</title>
+		<link rel='icon' href="{{ url_for('static', filename='images/celulas.ico') }}" type="image/ico"/>
+		<link rel='stylesheet' href="{{ url_for('static', filename='css/global.css') }}">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+		<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css' rel='stylesheet'>
+		<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js'></script>
+		<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js'></script>
+	</head>
+	<body>
+        <style>
+            @media print {
+                thead { display: table-header-group; }
+                tfoot { display: table-footer-group; }
+            }
+            @page {
+                margin: 20mm;
+            }
+        </style>
+        <strong>Doctor: </strong><span>{{ nombre_doctor }}</span><br/>
+        <strong>Fecha: </strong><span>{{ fecha_actual }}</span><br/>
+        <strong>Paciente:</strong><span>{{ nombre_paciente }}</span><br/>
+        <strong>Comentario: </strong><pre>{{ comentario }}</pre><br/>
+
+        <!--div class="table-responsive" style="max-height:600px;width:70em"-->
+        <!--div class="table-responsive">
+            <table class="table table-borderless table-striped" style="width:100%;border-style:none;border-width:0px">
+                <thead class="table-info" style="font-size:17px">
+                    <th class="text-center" style="border-style:groove;border-width:1px">BENIGNA</th>
+                    <th class="text-center" style="border-style:groove;border-width:1px">ASCUS</th>
+                    <th class="text-center" style="border-style:groove;border-width:1px">BAJOGRADO</th>
+                    <th class="text-center" style="border-style:groove;border-width:1px">ALTOGRADO</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span></span></td>
+                        <td><span style="min-width:100px"></span></td>
+                        <td><span style="min-width:100px"></span></td>
+                        <td><span style="min-width:100px"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div-->
+        <div class="table-responsive">
+            <table class="table table-borderless table-striped" style="width:100%;border-style:none;border-width:0px">
+                <thead class="table-info" style="font-size:17px">
+                    <th class="text-center" style="border-style:groove;border-width:1px;border-color:rgb(0, 0, 30);">BENIGNA</th>
+                    <th class="text-center" style="border-style:groove;border-width:1px;border-color:rgb(0, 0, 30);">ASCUS</th>
+                    <th class="text-center" style="border-style:groove;border-width:1px;border-color:rgb(0, 0, 30);">BAJOGRADO</th>
+                    <th class="text-center" style="border-style:groove;border-width:1px;border-color:rgb(0, 0, 30);">ALTOGRADO</th>
+                </thead>
+                <tbody style="background-color:rgb(0, 0, 30);">
+                    <tr>
+                        <td>
+                            <div class="container-fluid" style="display:flex;flex-direction: column;align-items: center;">
+                                {% for image in images %}
+                                    {% if image.categoria.value == 'benigna' %}
+                                    <div style="display: flex;flex-direction: column;">
+                                        <span style="font-size:15px;color:white;font-weight:bold" class="text-center">{{image.image_name}}</span>
+                                        <span style="font-size:15px;color:white" class="text-center">{{image.probabilidad}}</span>
+                                        <!--img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:200px"  onclick="clickImage(this)"-->
+                                    </div>    
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="container-fluid" style="display:flex;flex-direction: column;align-items: center;">
+                                {% for image in images %}
+                                    {% if image.categoria.value == 'ascus' %}
+                                    <div style="display: flex;flex-direction: column;">
+                                        <span style="font-size:15px;color:white;font-weight:bold" class="text-center">{{image.image_name}}</span>
+                                        <span style="font-size:15px;color:white" class="text-center">{{image.probabilidad}}</span>
+                                        <!--img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:200px" onclick="clickImage(this)"-->
+                                    </div>    
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="container-fluid" style="display:flex;flex-direction: column;align-items: center;">
+                                {% for image in images %}
+                                    {% if image.categoria.value == 'bajogrado' %}
+                                    <div style="display: flex;flex-direction: column;">
+                                        <span style="font-size:15px;color:white;font-weight:bold" class="text-center">{{image.image_name}}</span>
+                                        <span style="font-size:15px;color:white" class="text-center">{{image.probabilidad}}</span>
+                                        <!--img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:200px" onclick="clickImage(this)"-->
+                                    </div>    
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="container-fluid" style="display:flex;flex-direction: column;align-items: center;">
+                                {% for image in images %}
+                                    {% if image.categoria.value == 'altogrado' %}
+                                    <div style="display: flex;flex-direction: column;">
+                                        <span style="font-size:15px;color:white;font-weight:bold" class="text-center">{{image.image_name}}</span>
+                                        <span style="font-size:15px;color:white" class="text-center">{{image.probabilidad}}</span>
+                                        <!--img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:200px"  onclick="clickImage(this)"-->
+                                    </div>    
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </td>
+                        
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+	</body>
+</html>

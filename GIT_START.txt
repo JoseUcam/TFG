@@ -1,0 +1,23 @@
+1) Crea tu repositorio en GITHUB
+2) Ve a la carpeta que contiene la informacion que deseas subir en el repositorio que has creado
+3) COnfiguracion del entorno
+	   	git config --global user.name "<tu_user_name>"
+          	git config --global user.email <tu_mail>
+           	git config --global core.editor "core --wait"
+           	git config --global -e
+	   En Windows
+			git config --global core.autocrlf true
+	   En Mac
+           	git config --global core.autocrlf input
+4) Corre estos commandos
+	a) git init
+	b) git config --global --add safe.directory .
+	c) git rm -r --cached .
+	d) Crea el archivo .gitignore y agrega las rutas y archivos que deseas ignorer
+	e) Crea tu readme.md
+	f) git add .
+	g) git commit -m "first upload"
+	h) git branch -M main
+	i) git remote add origin https://github.com/JoseUcam/TFG.git
+	j) git push -u origin main
+	k) ALL DONE

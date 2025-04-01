@@ -1,0 +1,22 @@
+tensorflow==2.15.0
+numpy==1.26.4
+tensorflow-hub
+keras==2.15.0
+Pillow
+pandas
+psycopg2-binary
+mysql-connector-python
+flask_bcrypt
+flask_cors
+flask_restful
+flask_sqlalchemy
+flask-migrate
+flask-login
+scikit-learn
+matplotlib
+seaborn
+gunicorn
+python-dotenv
+opencv-python
+ipykernel
+#pip install -r requirements.txt
