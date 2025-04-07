@@ -9,6 +9,5 @@ __pycache__/
 migrations/
 uploads/
 cnn/static/uploads/
-modelo/
 best_mode_effnet.keras
 best_mode_effnet/
