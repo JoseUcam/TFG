@@ -17,6 +17,8 @@ from datetime import datetime
 import logging
 from PIL import Image
 import time
+import cv2
+from detection.cell_detector import CellDetector
 load_dotenv()
 
 # -- Configuración del logger
@@ -56,6 +58,69 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'dcm', 'tiff'}
 class RoleEnum(Enum):
     paciente = 'paciente'
     doctor = 'doctor'
+
+@app.route('/segregar_celulas', methods=['POST'])
+def segregar_celulas():
+    def generar_nombre_carpeta(base_path):
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        folder_name = f"celulas_{timestamp}"
+        folder_path = os.path.join(base_path, folder_name)
+        os.makedirs(folder_path, exist_ok=True)
+        return folder_path
+
+    if 'cell-image' not in request.files:
+        flash('No se seleccionó ninguna imagen', 'error')
+        return redirect(url_for('get_pacient_page'))
+
+    file = request.files['cell-image']
+    if file.filename == '':
+        flash('No se seleccionó ninguna imagen', 'error')
+        return redirect(url_for('get_pacient_page'))
+
+    # Procesar la imagen subida
+    try:
+        pacient_id = request.form.get('pacient_id')
+        upload_dir = 'C:\\Users\\Usuario\\Desktop\\celulas_segregadas\\uploads'
+        os.makedirs(upload_dir, exist_ok=True)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(upload_dir, file.filename)
+            file.save(filepath)
+
+            print(f'Ruta de imagen para segregar celulas: {filepath}')
+            image = cv2.imread(filepath)
+
+            # Detectar celulas
+            alpha=1.2
+            beta=20
+            kernel_size_blur=(3,3)
+            kernel_size_morph=(3,3)
+            distance_threshold=0.1
+            cell_bbox_size = (80, 80)
+            iou_threshold = 0.3
+            selected_boxes = CellDetector.detect_cells(image, alpha, beta, kernel_size_blur,
+                                          kernel_size_morph, distance_threshold,
+                                          cell_bbox_size, iou_threshold)
+
+            # Segregar cuadros delimitadores en carpeta
+            cell_output_size = (224, 224)
+            extracted_regions = CellDetector.extract_regions_interest(image, selected_boxes, cell_output_size)
+
+            # Guardar imágenes en carpeta generada
+            folder_name = generar_nombre_carpeta('C:\\Users\\Usuario\\Desktop\\celulas_segregadas')
+            print(f'Ruta de carpeta para segregar celulas: {folder_name}')
+
+            for num_cell, img_region in enumerate(extracted_regions):
+                cv2.imwrite(os.path.join(folder_name, f'celula_{num_cell}.jpeg'), img_region)
+
+            #detected_filepath = os.path.join(folder_name, f'celulas_detectadas.jpeg')
+            #CellDetector.save_detected_cells(image, selected_boxes, detected_filepath)
+
+        flash('Imagen segregada exitosamente!', 'success')
+    except Exception as e:
+        flash(f'Error al segregar la imagen: {str(e)}', 'error')
+    
+    return redirect(url_for('get_pacient_page', uid=pacient_id))
 
 @app.route('/<filename>')
 def download(filename):
@@ -258,6 +323,7 @@ def upload_file():
 
         print('Cargando modelo y predictor...')
         # -- Cargar el modelo y el predictor
+
         predictor = CNNModel.get_predictor(path=APP_PREDICTOR_NAME)
         modelo = CNNModel.load_model(path=APP_MODEL_NAME)
 

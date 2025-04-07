@@ -15,9 +15,9 @@ import pickle
 from dotenv import load_dotenv
 load_dotenv()
 
-print(tf.__version__)
-print(np.__version__)
-print(keras.__version__)
+#print(tf.__version__)
+#print(np.__version__)
+#print(keras.__version__)
 
 # -- Leer el archivo .env
 try:
@@ -90,7 +90,6 @@ class CNNModel(object):
         with open(path, 'rb') as f:
             return pickle.load(f)
 
-
 def diagnosticar(modelo:object, predictor:dict, file_path:str):
     '''
     Categorizar la imagen con el modelo
@@ -103,13 +102,15 @@ def diagnosticar(modelo:object, predictor:dict, file_path:str):
     except Exception as e:
         return {'prediccion': 'Ocurrió un error al procesar la imagen', 'probabilidad':0, 'status': False, 'message':str(e)}
 
-
 if __name__ == '__main__':
     #cnn = CNNModel()
     #cnn.save_predictor(path=PREDICTOR_NAME)
     print(MODEL_NAME)
+    #print(numpy.__file__)
     predictor = CNNModel.get_predictor(path=PREDICTOR_NAME)
     modelo = CNNModel.load_model(path=MODEL_NAME)
+    #modelo = CNNModel.load_model(path="")
+    
 
     print(f'Predictor: {predictor}')
     print(f'Modelo: {modelo}')
