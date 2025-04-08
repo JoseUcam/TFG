@@ -72,6 +72,8 @@ def segregar_celulas():
         flash('No se seleccionó ninguna imagen', 'error')
         return redirect(url_for('get_pacient_page'))
 
+    ancho = int(float(request.form.get('ancho')))
+    alto = int(float(request.form.get('alto')))
     file = request.files['cell-image']
     if file.filename == '':
         flash('No se seleccionó ninguna imagen', 'error')
@@ -80,7 +82,7 @@ def segregar_celulas():
     # Procesar la imagen subida
     try:
         pacient_id = request.form.get('pacient_id')
-        upload_dir = 'C:\\Users\\Usuario\\Desktop\\celulas_segregadas\\uploads'
+        upload_dir = 'C:\\Users\\migue\\Desktop\\celulas_segregadas\\uploads'
         os.makedirs(upload_dir, exist_ok=True)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -96,7 +98,7 @@ def segregar_celulas():
             kernel_size_blur=(3,3)
             kernel_size_morph=(3,3)
             distance_threshold=0.1
-            cell_bbox_size = (80, 80)
+            cell_bbox_size = (ancho, alto)
             iou_threshold = 0.3
             selected_boxes = CellDetector.detect_cells(image, alpha, beta, kernel_size_blur,
                                           kernel_size_morph, distance_threshold,
@@ -107,7 +109,7 @@ def segregar_celulas():
             extracted_regions = CellDetector.extract_regions_interest(image, selected_boxes, cell_output_size)
 
             # Guardar imágenes en carpeta generada
-            folder_name = generar_nombre_carpeta('C:\\Users\\Usuario\\Desktop\\celulas_segregadas')
+            folder_name = generar_nombre_carpeta('C:\\Users\\migue\\Desktop\\celulas_segregadas')
             print(f'Ruta de carpeta para segregar celulas: {folder_name}')
 
             for num_cell, img_region in enumerate(extracted_regions):
@@ -140,6 +142,7 @@ def convert_to_pdf(data:str, report_name:str) -> None:
     '''
     Convierte un archivo a PDF
     RUTA BASE > C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe
+    https://pypi.org/project/pdfkit/
     '''
     import pdfkit
 
@@ -176,7 +179,8 @@ def generate_report(cid: int):
     filename = f'reporte_{cid}.pdf'
     try:
         convert_to_pdf(data=rep, report_name=filename)
-    except:
+    except Exception as e:
+        #print(e)
         None
 
     return redirect(url_for('static', filename=f'uploads/{filename}'))
@@ -483,6 +487,66 @@ def update_user(uid:int):
 
     return redirect(url_for('get_pacient_page', uid=user.id))
     
+@app.route('/admin_page', methods=['POST', 'GET'])
+def admin_page():
+    '''
+    Creacion de usuarios por medio de vista administrador
+    '''
+    if request.method == 'GET':
+        return render_template('admin_page.html'), 200
+
+    try:
+        # -- Intentar obtener los datos desde JSON o Form
+        data = request.get_json() if request.is_json else request.form
+        usermail = data.get('usermail', None)
+        password = data.get('password', None)
+        username = data.get('username', None) 
+        lastname = data.get('lastname', None)
+        role     = data.get('role', None)
+        dni      = data.get('dni', None)
+        address  = data.get('address', '-')
+        phone_number = data.get('phone_number', '-')
+        birthday = data.get('birthday', None)
+
+        if None in (usermail,password,username, lastname, role):
+            return render_template('register_failed.html', message='Registro fallido, intente de nuevo mas tarde ó contacte a un administrador'), 400
+
+        # Convertir la fecha de nacimiento a un objeto datetime.date
+        try:
+            birthday = datetime.strptime(birthday, '%Y-%m-%d').date()
+        except ValueError:
+            return render_template('register_failed.html', message='Fecha de nacimiento no válida'), 400
+        
+        # -- Verificar si el usuario ya existe
+        existing_user = User.query.filter_by(usermail=usermail).first()
+        if existing_user:
+            return render_template('register_failed.html', message='Registro fallido, intente de nuevo mas tarde ó contacte a un administrador'), 400
+
+        # -- Hashear la contraseña
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+        # -- Guardar usuario en la base de datos
+        new_user = User(usermail=usermail,
+                        password_hash=hashed_password,
+                        username=username,
+                        lastname=lastname,
+                        role=role,
+                        dni=dni,
+                        address=address,
+                        phone_number=phone_number,
+                        birthday=birthday
+                        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        return render_template('user_registered.html', message='Usuario registrado satisfactoriamente'), 200
+
+    except IntegrityError:
+        db.session.rollback()
+        return render_template('register_failed.html', message='Registro fallido, intente de nuevo mas tarde ó contacte a un administrador'), 400
+    except Exception as e:
+        return render_template('register_failed.html', message='Registro fallido, intente de nuevo mas tarde ó contacte a un administrador'), 400
+    
 @app.route('/register', methods=['POST', 'GET'])
 def new_account():
     '''
@@ -557,6 +621,8 @@ def login():
             return redirect(url_for('get_pacient_page'))
         elif current_user.role.value == RoleEnum.doctor.value:
             return redirect(url_for('get_pacient_list'))
+        elif current_user.role.value == RoleEnum.admin.value:
+            return redirect(url_for('admin_page'))
         
     if request.method == 'GET':
         return render_template('login.html'), 200

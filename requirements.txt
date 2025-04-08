@@ -19,4 +19,5 @@ gunicorn
 python-dotenv
 opencv-python
 ipykernel
+pdfkit
 #pip install -r requirements.txt

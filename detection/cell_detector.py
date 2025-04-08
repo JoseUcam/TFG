@@ -218,8 +218,7 @@ class CellDetector:
             print(f'Se detectaron {len(selected_boxes)} células luego de aplicar NMS')
             return selected_boxes
         return boxes
-
-
+    
 def generar_nombre_carpeta(base_path):
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     folder_name = f"celulas_{timestamp}"
