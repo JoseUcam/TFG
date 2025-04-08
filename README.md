@@ -20,6 +20,13 @@
     >>> pip install -r requirements.txt
 ```
 
+<h3>Instalar WKHTMLTOX</h3>
+
+```
+    wkhtmltox-0.12.6-1.msvc2015-win64.exe
+    RUTA :: C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe
+```
+
 <h3>Crear la base de datos</h3>
 
 ```
