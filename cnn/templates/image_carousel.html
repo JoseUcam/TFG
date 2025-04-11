@@ -38,12 +38,12 @@
         </div>
     </nav>
 
-    <div class="container-fluid content_body pacientlist" style="width:100%">
+    <div class="container-fluid content_body pacientlist" style="width:100%;">
         <video autoplay muted loop id="loginVideo" style="width:100%;position: absolute;z-index: -1000;background-color: rgb(0, 0, 30);">
             <source src="{{ url_for('static', filename='images/Diagnostico.mp4') }}" type="video/mp4">
             </video>
-        <div class="container-fluid" style="display:flex;flex-direction: row;gap:3px;justify-content: center;flex-wrap: nowrap;">
-            <div style="padding:5px;border-radius: 8px;display:flex;flex-direction: column;align-items: center;">
+        <div class="container-fluid" style="display:flex;flex-direction: row;gap:3px;justify-content: center;flex-wrap: nowrap;margin-top:10vh">
+            <div style="padding:5px;margin-right:3vw;border-radius: 8px;display:flex;flex-direction: column;align-items: center;">
                 <!-- Images -->
                 <div id="citologias_img" style="margin-top: 42.5px;">
                     <div style="text-align: center;color:white;font-size:20px;background-color: rgb(0, 0, 30);padding: 0.5em;">
@@ -52,7 +52,7 @@
                             <div class="texto"></div >
                         </b>
                     </div>
-                    <img src="" alt="Imagen" style="width:500px !important;">
+                    <img src="" alt="Imagen" style="width:20vw !important;margin-top:1vh">
                 </div>
                 <script defer>
                     function clickImage(image) {
@@ -63,48 +63,12 @@
 
                     }
                 </script>
-            <!-- /Images -->
-                <!-- Carrusel -->
-                <!--
-                <div id="citologias_img" class="carousel slide" data-bs-ride="false">
-                    <div class="carousel-indicators">
-                        {% for image in images %}
-                            <button type="button" data-bs-target="#citologias_img" data-bs-slide-to="{{ loop.index0 }}" class="{{ 'active' if loop.index == 1 else '' }}" title="{{ image.image_path }}"></button>
-                        {% endfor %}
-                    </div>
             
-                    <div class="carousel-inner">
-                        {% for image in images %}
-                            <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
-                                <img src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="width:500px !important">
-
-                -->
-                <!-- Mostrar detalles de la imagen -->
-                <!--
-                                <div class="carousel-caption" style="bottom:0px">
-                                    <p><strong>Categoría:</strong> {{ image.categoria.value or '-'}}</p>
-                                    <p><strong>Probabilidad:</strong> {{ image.probabilidad if image.probabilidad is not none else '-' }}{% if image.probabilidad is not none %}%{% endif %}</p>
-                                    <p><strong>Fecha de revisión:</strong> {{ image.fecha_revision or '-'}}</p>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                -->
-                    <!-- https://icons.getbootstrap.com/ -->
-                <!--
-                    <button class="carousel-control-prev" type="button" data-bs-target="#citologias_img" data-bs-slide="prev">
-                        <i class="bi bi-caret-left-square-fill" style="color:red;font-size:24px"></i>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#citologias_img" data-bs-slide="next">
-                        <i class="bi bi-caret-right-square-fill" style="color:red;font-size:24px"></i>
-                    </button>
-                </div>
-                -->
                 
                 
                 {% for image in images %}
                             
-                <img src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="width:500px !important;display:none">
+                <img src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="width:20vw !important;display:none">
                 <!-- Mostrar detalles de la imagen -->
                 <div class="carousel-caption" style="bottom:0px;display:none">
                     <p><strong>Categoría:</strong> {{ image.categoria.value or '-'}}</p>
@@ -115,7 +79,7 @@
                 
             </div>
             <div id="tabla-citologia" class="cristal" style="border-radius: 8px;">
-                <div class="table-responsive" style="max-height:600px;width:70em">
+                <div class="table-responsive" style="max-height:30vw;">
                     <table class="table table-hover table-borderless">
                         <thead class="table-info" style="position: sticky;top: 0;z-index: 10;font-size:17px">
                             <th class="text-center" style="border-style:groove;border-width:1px">BENIGNA</th>
@@ -132,7 +96,7 @@
                                             <div style="display: flex;flex-direction: column;">
                                             <span style="font-size:15px;color:white;font-weight:bold" class="text-center">{{image.image_name}}</span>
                                                 <span style="font-size:15px;color:white" class="text-center">{{image.probabilidad}}</span>
-                                                <img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:200px"  onclick="clickImage(this)">
+                                                <img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:10vw"  onclick="clickImage(this)">
                                                 </div>    
                                             {% endif %}
                                         {% endfor %}
@@ -145,7 +109,7 @@
                                             <div style="display: flex;flex-direction: column;">
                                             <span style="font-size:15px;color:white;font-weight:bold" class="text-center">{{image.image_name}}</span>
                                                 <span style="font-size:15px;color:white" class="text-center">{{image.probabilidad}}</span>
-                                                <img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:200px" onclick="clickImage(this)">
+                                                <img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:10vw" onclick="clickImage(this)">
                                                 </div>    
                                             {% endif %}
                                         {% endfor %}
@@ -158,7 +122,7 @@
                                             <div style="display: flex;flex-direction: column;">
                                             <span style="font-size:15px;color:white;font-weight:bold" class="text-center">{{image.image_name}}</span>
                                                 <span style="font-size:15px;color:white" class="text-center">{{image.probabilidad}}</span>
-                                                <img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:200px" onclick="clickImage(this)">
+                                                <img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:10vw" onclick="clickImage(this)">
                                                 </div>    
                                             {% endif %}
                                         {% endfor %}
@@ -171,7 +135,7 @@
                                             <div style="display: flex;flex-direction: column;">
                                             <span style="font-size:15px;color:white;font-weight:bold" class="text-center">{{image.image_name}}</span>
                                                 <span style="font-size:15px;color:white" class="text-center">{{image.probabilidad}}</span>
-                                                <img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:200px"  onclick="clickImage(this)">
+                                                <img class="mini_image rounded" src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="margin:3px;width:10vw"  onclick="clickImage(this)">
                                                 </div>    
                                             {% endif %}
                                         {% endfor %}
@@ -189,7 +153,7 @@
                     </div>
                     <div>
                         <form action="/update_cid/{{cid}}/{{uid}}" method="post" enctype="multipart/form-data" style="margin-bottom:10px">
-                            <textarea class="form-control" name="comment" rows="4" cols="50" placeholder="Indique una observación..." style="margin-bottom:10px;width:100%">{{observacion}}</textarea>
+                            <textarea class="form-control" name="comment" rows="4" cols="50" placeholder="Indique una observación..." style="margin-bottom:10px;width:100%;height:5em">{{observacion}}</textarea>
                             <button class="btn btn-dark" type="submit" title="Indica un comentario para esta citología">Comentar</button>
                             <a class="btn btn-dark" href="/pacient_page/{{uid}}" style="margin:5px;" title="Regresar a las citologías del usuario">⬅️ Atrás</a>
                         </form>

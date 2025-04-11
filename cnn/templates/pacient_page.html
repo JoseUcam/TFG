@@ -47,7 +47,7 @@
 
             {% if user_role == "paciente" %}
                 <div class='container-fluid' style='padding:0px;margin-top:10px'>
-                    <h3 style="color:white">Bienvenido, 🪪 {{ user.username }} {{ user.lastname }}!</h3>
+                    <h3 style="color:white">Bienvenido/a, {{ user.username }} {{ user.lastname }}</h3>
                 </div>
                 <br/>
                 <h1 style="color:white"> Historial del paciente</h1>
@@ -115,14 +115,14 @@
                 <div class="container-fluid" id="nueva_citologia" name="nueva_citologia">
                     <a class="btn btn-info btn-md" href="/pacient_list" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Gestión de Pacientes</b></a>
                     <button class="btn btn-info bnt-sm" data-bs-toggle="collapse" data-bs-target="#new_cit" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Clasificar Células</b></button>
-                    <button class="btn btn-info bnt-sm" data-bs-toggle="collapse" data-bs-target="#new_segr" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Segregar Células</b></button>
+                    <button class="btn btn-info bnt-sm" data-bs-toggle="collapse" data-bs-target="#new_segr" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Detectar Células</b></button>
                     
                     <div id="new_segr" class="collapse" style="margin-top:25px" data-bs-parent="#nueva_citologia">
                         <form id="form_segrega" action="/segregar_celulas" method="post" enctype="multipart/form-data" style="display: inline;">
                             <div style="display:flex;flex-direction: row;">
                                 <input type="file" id="cell-image" name="cell-image" accept="image/*" style="display: none;" onchange="submitForm()">
                                 <label for="cell-image" class="btn btn-info bnt-sm" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white; cursor: pointer;">
-                                    <b>Imagen de la Citologia</b>
+                                    <b>Seleccionar la Imagen de la Citologia</b>
                                 </label>
     
                                 <div style="height:10px"></div>
@@ -143,22 +143,28 @@
                     <div id="new_cit" class="collapse" style="margin-top:25px" data-bs-parent="#nueva_citologia">
                         <form id="form_citologia" action="/upload" method="post" enctype="multipart/form-data" onsubmit="DeshabilitaBoton(event)">
                             <div class="mb-3">
-                                <label for="citologia-date" class="form-label text-white">Fecha de la citología</label>
-                                <input type="date" class="form-control" id="citologia-date" name="citologia-date" required />
+                                <div class="row">
+                                   <div class="col-4">
+                                    <label for="citologia-date" class="form-label text-white">Fecha de la citología</label>
+                                    <input type="date" class="form-control" id="citologia-date" name="citologia-date" required />
+                                   </div> 
+                                   <div class="col-8">
+                                        <label for="citologia-code" class="form-label text-white">Código de la citología</label>
+                                        <input type="text" class="form-control" id="citologia-code" name="citologia-code" value="{{user.usermail}}" readonly/>
+                                   </div>
+                                </div>
                                 <br />
-                        
-                                <label for="citologia-code" class="form-label text-white">Código de la citología</label>
-                                <input type="text" class="form-control" id="citologia-code" name="citologia-code" value="{{user.usermail}}" readonly/>
-                                <br />
-
-                                <label for="citologia-lab" class="form-label text-white">Laboratorio</label>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label for="citologia-lab" class="form-label text-white">Laboratorio</label>
                                 <input type="text" class="form-control" id="citologia-lab" name="citologia-lab"/>
-                                <br />
-
-                                <label for="citologia-images" class="form-label text-white">Subir imágenes</label>
+                                    </div>
+                                    <div class="col-8">
+                                        <label for="citologia-images" class="form-label text-white">Subir imágenes</label>
                                 <input type="file" class="form-control" id="citologia-images" name="citologia-images" accept="image/*" multiple required />
+                                    </div>
+                                </div>
                                 <br />
-                        
                                 <!-- CODIGO OCULTO DEL PACIENTE -->
                                 <input type="hidden" class="form-control" id="pacient_id" name="pacient_id" value="{{user.id}}" readonly/>
                                 <button id="btn_crear" class="btn btn-success w-100" type="submit" style="max-width: 100px">Crear</button>
