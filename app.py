@@ -18,6 +18,7 @@ import logging
 from PIL import Image
 import time
 import cv2
+import zipfile
 from detection.cell_detector import CellDetector
 load_dotenv()
 
@@ -72,8 +73,11 @@ def segregar_celulas():
         flash('No se seleccionó ninguna imagen', 'error')
         return redirect(url_for('get_pacient_page'))
 
+    # -- Capturar campos de configuración
     ancho = int(float(request.form.get('ancho')))
     alto = int(float(request.form.get('alto')))
+    iou_threshold = float(request.form.get('iou_threshold'))
+
     file = request.files['cell-image']
     if file.filename == '':
         flash('No se seleccionó ninguna imagen', 'error')
@@ -82,8 +86,11 @@ def segregar_celulas():
     # Procesar la imagen subida
     try:
         pacient_id = request.form.get('pacient_id')
+
+        # -- Ruta donde sube la imagen original
         upload_dir = 'C:\\Users\\migue\\Desktop\\celulas_segregadas\\uploads'
         os.makedirs(upload_dir, exist_ok=True)
+
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filepath = os.path.join(upload_dir, file.filename)
@@ -99,30 +106,56 @@ def segregar_celulas():
             kernel_size_morph=(3,3)
             distance_threshold=0.1
             cell_bbox_size = (ancho, alto)
-            iou_threshold = 0.3
+            iou_threshold_ = iou_threshold
             selected_boxes = CellDetector.detect_cells(image, alpha, beta, kernel_size_blur,
                                           kernel_size_morph, distance_threshold,
-                                          cell_bbox_size, iou_threshold)
+                                          cell_bbox_size, iou_threshold_)
 
             # Segregar cuadros delimitadores en carpeta
             cell_output_size = (224, 224)
             extracted_regions = CellDetector.extract_regions_interest(image, selected_boxes, cell_output_size)
 
             # Guardar imágenes en carpeta generada
-            folder_name = generar_nombre_carpeta('C:\\Users\\migue\\Desktop\\celulas_segregadas')
-            print(f'Ruta de carpeta para segregar celulas: {folder_name}')
+            #folder_name = generar_nombre_carpeta('C:\\Users\\migue\\Desktop\\celulas_segregadas')
 
+            #folder_name = generar_nombre_carpeta('celulas_segregadas/')
+            timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            folder_name = f"celulas_{timestamp}"
+            # -- Crea la ruta para la segregacion
+            folder_path = os.path.join(app.config['UPLOAD_PATH']+'/celulas_segregadas', folder_name)
+            # -- Crea el folder para la segregacion
+            os.makedirs(folder_path, exist_ok=True)
+            
+            print(f'Ruta de carpeta para segregar celulas: {folder_path}')
+
+            rutas = []
             for num_cell, img_region in enumerate(extracted_regions):
-                cv2.imwrite(os.path.join(folder_name, f'celula_{num_cell}.jpeg'), img_region)
+                #cv2.imwrite(os.path.join(folder_name, f'celula_{num_cell}.jpeg'), img_region)
+                ruta = os.path.join(folder_path, f'celula_{num_cell}.jpeg')
+                rutas.append(ruta.replace('\\', '/'))
+                cv2.imwrite(ruta, img_region)
+
+            # -- Crear archivo comprimido que contiene las imagenes segregadas
+            with zipfile.ZipFile(os.path.join(folder_path, f'{folder_name}.zip'), 'w') as zipf:
+                for archivo in rutas:
+                    # -- Agregar archivo al comprimido
+                    ruta_relativa = os.path.relpath(archivo, start=folder_path)
+                    zipf.write(archivo, arcname=ruta_relativa)
+
+            # -- Borrar archivos
+            for archivo in rutas:
+                os.remove(archivo)
 
             #detected_filepath = os.path.join(folder_name, f'celulas_detectadas.jpeg')
             #CellDetector.save_detected_cells(image, selected_boxes, detected_filepath)
 
         flash('Imagen segregada exitosamente!', 'success')
+        return redirect(url_for('static', filename=f'uploads/celulas_segregadas/{folder_name}/{folder_name}.zip'))
+        #return render_template('cell_detection.html', message='Descargue su segregacion', uid=pacient_id)
     except Exception as e:
         flash(f'Error al segregar la imagen: {str(e)}', 'error')
     
-    return redirect(url_for('get_pacient_page', uid=pacient_id))
+    #return redirect(url_for('get_pacient_page', uid=pacient_id))
 
 @app.route('/<filename>')
 def download(filename):
@@ -348,7 +381,7 @@ def upload_file():
                         png_filename = filename.replace('.tiff', '.jpeg')
                         png_filepath = os.path.join(pacient_folder, png_filename)
                         real_path = f'uploads/{code_name}/{png_filename}'
-                        img.save(png_filepath, 'JPEG')  # Guardar como PNG
+                        img.save(png_filepath, 'JPEG')  # Guardar como JPEG
                         filepath = png_filepath
                 else:
                     file.save(filepath)
@@ -466,7 +499,7 @@ def update_user(uid:int):
 
     # -- Intentar obtener los datos desde JSON o Form
     data = request.get_json() if request.is_json else request.form
-    nombre = data.get('nombre', user.username)
+    nombre = data.get('username', user.username)
     lastname = data.get('lastname', user.lastname)
     dni = data.get('dni', user.dni)
     address = data.get('address', user.address)

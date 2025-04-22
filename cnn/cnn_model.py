@@ -64,15 +64,24 @@ class CNNModel(object):
         return np.argmax(prediccion[0], axis=-1), max(prediccion[0])
 
 
-    @staticmethod
-    def categorizador_local(model:object, path:str) -> int:
-        img = Image.open(path)
-        img = np.array(img)
-        img = cv2.resize(img, (CNNModel.IMAGE_SIZE, CNNModel.IMAGE_SIZE))
-        img = img.astype(np.uint8)
-        prediccion = model.predict(img.reshape(-1, CNNModel.IMAGE_SIZE, CNNModel.IMAGE_SIZE, 3))
-        return np.argmax(prediccion[0], axis=-1) , max(prediccion[0])
+    #@staticmethod
+    #def categorizador_local(model:object, path:str) -> int:
+    #    img = Image.open(path)
+    #    img = np.array(img)
+    #    img = cv2.resize(img, (CNNModel.IMAGE_SIZE, CNNModel.IMAGE_SIZE))
+    #    img = img.astype(np.uint8)
+    #    prediccion = model.predict(img.reshape(-1, CNNModel.IMAGE_SIZE, CNNModel.IMAGE_SIZE, 3))
+    #    return np.argmax(prediccion[0], axis=-1) , max(prediccion[0])
 
+    @staticmethod
+    def categorizador_local(model:object, path:str):
+        image = tf.io.read_file(path)
+        image = tf.image.decode_jpeg(image, channels=3)  # Leer imagen
+        image = tf.image.resize(image,  (CNNModel.IMAGE_SIZE, CNNModel.IMAGE_SIZE))    # Cambiar tamaño
+        image = tf.cast(image, tf.uint8)
+        image = tf.expand_dims(image, axis=0)
+        prediccion = model.predict(image)
+        return np.argmax(prediccion[0], axis=-1) , max(prediccion[0])
 
     def save_predictor(self, path:str):
         '''

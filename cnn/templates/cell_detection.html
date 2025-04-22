@@ -1,7 +1,6 @@
 {% extends 'layout.html' %}
-{% block title %}Autenticar{% endblock %}
+{% block title %}Notificacion{% endblock %}
 {% block content %}
-
     <nav class="navbar navbar-expand-sm bg-dark navbar-dark" style="position:fixed;top:0;width:100%">
         <div class="container-fluid">
             <!--a class="navbar-brand" href="#"></a><img src="{{ url_for('static', filename='images/celulas.ico') }}" alt='Celulas' width=50-->
@@ -25,9 +24,14 @@
                             </svg-->
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/pacient_list" style="font-size:28px">Gestión de Pacientes</a>
-                    </li>
+                    {% if user_role == "doctor" %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/register" style="font-size:28px">Añadir Usuario</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pacient_list" style="font-size:28px">Gestión de Pacientes</a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="/logout" style="font-size:28px">Cerrar Sesión</a>
                     </li>
@@ -37,14 +41,14 @@
     </nav>
 
     <div class="container-fluid content_body" style="width:100%">
-        <div class='container-fluid p-1 text-center' style='max-width:380px;display:flex;flex-direction: column;border-radius:0px;font-family: "OCR-A", monospace; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);background-color:white'>
-            <div class="alert alert-success">
-                <span class="alert-link" style="font-size:22px;color:gray">{{message}}</span>
+        <div class='container-fluid p-1 text-center' style='max-width:600px;display:flex;flex-direction: column;border-radius:0px;margin-top:20px;font-family: "OCR-A", monospace; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);background-color:white'>
+            <div class="alert alert-info">
+                <span class="alert-link" style="font-size:22px;color:gray"><br/>{{message}}</span>
             </div>
 			<div>
 				<button onclick="window.history.back()" class="btn btn-warning" style="margin:5px;min-width:224px" title="Volver atrás">⬅️ Atrás</button>
 			</div>
         </div>
     </div>
-    
+
 {% endblock %}

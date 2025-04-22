@@ -12,7 +12,8 @@
                 <ul class="navbar-nav">
                     <li class="nav-item" style="display:flex;align-items:center">
                         <a class="nav-link" href="/">
-                            <svg fill="currentColor" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                            <img src="{{ url_for('static', filename='images/LOGO.png') }}" style="width: 3em;">
+                            <!--svg fill="currentColor" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
                                 height="30px" viewBox="0 0 545 545"
                                 xml:space="preserve">
                             <g>
@@ -21,7 +22,8 @@
                                     c0-12.087,9.945-22.108,22.109-22.108h93.865c12.239,0,22.108,9.792,22.108,22.108v145.886h92.947
                                     c12.24,0,22.108-9.945,22.108-22.108v-221.85h75.965C549.021,272.995,552.081,264.886,540.76,254.788z"/>
                             </g>
-                            </svg></a>
+                            </svg-->
+                        </a>
                     </li>
                     {% if user_role == "doctor" %}
                         <li class="nav-item">
@@ -121,17 +123,20 @@
                         <form id="form_segrega" action="/segregar_celulas" method="post" enctype="multipart/form-data" style="display: inline;">
                             <div style="display:flex;flex-direction: row;">
                                 <input type="file" id="cell-image" name="cell-image" accept="image/*" style="display: none;" onchange="submitForm()">
-                                <label for="cell-image" class="btn btn-info bnt-sm" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white; cursor: pointer;">
+                                <label for="cell-image" class="btn bnt-sm" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white; cursor: pointer;background-color: #00cc66;">
                                     <b>Seleccionar la Imagen de la Citologia</b>
                                 </label>
     
                                 <div style="height:10px"></div>
     
                                 <label for="ancho" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#00001e !important">Ancho de Célula</label>
-                                <input class="form-control" id="ancho" name="ancho" type="number" value="80" style="max-width:80px" placeholder="Anchura de celulas" required/>
+                                <input class="form-control" id="ancho" name="ancho" type="number" value="80" style="max-width:80px" placeholder="Anchura de celulas" title="Ancho de Célula" required/>
                                 
                                 <label for="alto" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#00001e !important">Alto de Célula</label>
-                                <input class="form-control" id="alto" name="alto" type="number" value="80" style="max-width:80px" placeholder="Altura de celulas" required/>
+                                <input class="form-control" id="alto" name="alto" type="number" value="80" style="max-width:80px" placeholder="Altura de celulas" title="Alto de Célula" required/>
+                                
+                                <label for="iou_threshold" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#00001e !important">IoU Threshold</label>
+                                <input class="form-control" id="iou_threshold" name="iou_threshold" type="number" value="0.3" step="0.01" max="1" min="0.01" style="max-width:80px" placeholder="IoU" title="Porcentaje de superposición" required/>
                                 
                             </div>
 
@@ -167,7 +172,7 @@
                                 <br />
                                 <!-- CODIGO OCULTO DEL PACIENTE -->
                                 <input type="hidden" class="form-control" id="pacient_id" name="pacient_id" value="{{user.id}}" readonly/>
-                                <button id="btn_crear" class="btn btn-success w-100" type="submit" style="max-width: 100px">Crear</button>
+                                <button id="btn_crear" class="btn w-100" type="submit" style="max-width: 100px;background-color: #00cc66;color:white">Crear</button>
                             </div>
                         </form>
                     </div>
@@ -197,9 +202,11 @@
                                 <th>
                                     <span>Informe</span>
                                 </th>
-                                <th>
-                                    <span>Borrar</span>
-                                </th>
+                                {% if user_role == "doctor" %}
+                                    <th>
+                                        <span>Borrar</span>
+                                    </th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -215,12 +222,13 @@
                                             <button type="submit" class="btn btn-dark btn-sm">Descargar</button>
                                         </form>
                                     </td>
-                                    <td>
-                                        <form action="{{ url_for('delete_citologia', cid=citologia.id) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta citología?');">
-                                            <button type="submit" class="btn">❌</button>
-                                        </form>
-                                    </td>
-                                    
+                                    {% if user_role == "doctor" %}
+                                        <td>
+                                            <form action="{{ url_for('delete_citologia', cid=citologia.id) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta citología?');">
+                                                <button type="submit" class="btn">❌</button>
+                                            </form>
+                                        </td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                         </tbody>
