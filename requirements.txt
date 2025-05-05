@@ -20,4 +20,5 @@ python-dotenv
 opencv-python
 ipykernel
 pdfkit
+beautifultable
 #pip install -r requirements.txt

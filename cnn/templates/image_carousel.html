@@ -62,21 +62,17 @@
                         document.querySelector('#citologias_img img').setAttribute("src",image.getAttribute("src"));
                         document.querySelectorAll('#citologias_img #banner .texto')[0].textContent = image.parentElement.getElementsByTagName('span')[0].textContent;
                         document.querySelectorAll('#citologias_img #banner .texto')[1].textContent = image.parentElement.getElementsByTagName('span')[1].textContent;
-
                     }
                 </script>
             
-                
-                
                 {% for image in images %}
-                            
-                <img src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="width:20vw !important;display:none">
-                <!-- Mostrar detalles de la imagen -->
-                <div class="carousel-caption" style="bottom:0px;display:none">
-                    <p><strong>Categoría:</strong> {{ image.categoria.value or '-'}}</p>
-                    <p><strong>Probabilidad:</strong> {{ image.probabilidad if image.probabilidad is not none else '-' }}{% if image.probabilidad is not none %}%{% endif %}</p>
-                    <p><strong>Fecha de revisión:</strong> {{ image.fecha_revision or '-'}}</p>
-                </div>
+                    <img src="{{ url_for('static', filename=image.image_path) }}" alt="Imagen {{ loop.index }}" style="width:20vw !important;display:none">
+                    <!-- Mostrar detalles de la imagen -->
+                    <div class="carousel-caption" style="bottom:0px;display:none">
+                        <p><strong>Categoría:</strong> {{ image.categoria.value or '-'}}</p>
+                        <p><strong>Probabilidad:</strong> {{ image.probabilidad if image.probabilidad is not none else '-' }}{% if image.probabilidad is not none %}%{% endif %}</p>
+                        <p><strong>Fecha de revisión:</strong> {{ image.fecha_revision or '-'}}</p>
+                    </div>
                 {% endfor %}
                 
             </div>
@@ -157,9 +153,11 @@
                         <form action="/update_cid/{{cid}}/{{uid}}" method="post" enctype="multipart/form-data" style="margin-bottom:10px">
                             
                             {% if user_role == "doctor" %}
+                                <pre class="form-control" name="comment" style="margin-bottom:10px;width:100%;">{{resume}}</pre>
                                 <textarea class="form-control" name="comment" rows="4" cols="50" placeholder="Indique una observación..." style="margin-bottom:10px;width:100%;height:5em">{{observacion}}</textarea>
                                 <button class="btn btn-dark" type="submit" title="Indica un comentario para esta citología">Comentar</button>
                             {% else %}
+                                <pre class="form-control" name="comment" style="margin-bottom:10px;width:100%;">{{resume}}</pre>
                                 <textarea class="form-control" name="comment" rows="4" cols="50" placeholder="Indique una observación..." style="margin-bottom:10px;width:100%;height:5em" disabled>{{observacion}}</textarea>
                             {% endif %}
                             <a class="btn btn-dark" href="/pacient_page/{{uid}}" style="margin:5px;" title="Regresar a las citologías del usuario">⬅️ Atrás</a>

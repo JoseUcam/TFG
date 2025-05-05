@@ -118,7 +118,8 @@
                     <a class="btn btn-info btn-md" href="/pacient_list" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Gestión de Pacientes</b></a>
                     <button class="btn btn-info bnt-sm" data-bs-toggle="collapse" data-bs-target="#new_cit" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Clasificar Células</b></button>
                     <button class="btn btn-info bnt-sm" data-bs-toggle="collapse" data-bs-target="#new_segr" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Detectar Células</b></button>
-                    
+                    <button class="btn btn-info bnt-sm" data-bs-toggle="collapse" data-bs-target="#new_segr2" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Detectar y Clasificar Células</b></button>
+
                     <div id="new_segr" class="collapse" style="margin-top:25px" data-bs-parent="#nueva_citologia">
                         <form id="form_segrega" action="/segregar_celulas" method="post" enctype="multipart/form-data" style="display: inline;">
                             <div style="display:flex;flex-direction: row;">
@@ -129,13 +130,13 @@
     
                                 <div style="height:10px"></div>
     
-                                <label for="ancho" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#00001e !important">Ancho de Célula</label>
+                                <label for="ancho" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">Ancho de Célula</label>
                                 <input class="form-control" id="ancho" name="ancho" type="number" value="80" style="max-width:80px" placeholder="Anchura de celulas" title="Ancho de Célula" required/>
                                 
-                                <label for="alto" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#00001e !important">Alto de Célula</label>
+                                <label for="alto" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">Alto de Célula</label>
                                 <input class="form-control" id="alto" name="alto" type="number" value="80" style="max-width:80px" placeholder="Altura de celulas" title="Alto de Célula" required/>
                                 
-                                <label for="iou_threshold" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#00001e !important">IoU Threshold</label>
+                                <label for="iou_threshold" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">IoU Threshold</label>
                                 <input class="form-control" id="iou_threshold" name="iou_threshold" type="number" value="0.3" step="0.01" max="1" min="0.01" style="max-width:80px" placeholder="IoU" title="Porcentaje de superposición" required/>
                                 
                             </div>
@@ -162,11 +163,11 @@
                                 <div class="row">
                                     <div class="col-4">
                                         <label for="citologia-lab" class="form-label text-white">Laboratorio</label>
-                                <input type="text" class="form-control" id="citologia-lab" name="citologia-lab"/>
+                                        <input type="text" class="form-control" id="citologia-lab" name="citologia-lab"/>
                                     </div>
                                     <div class="col-8">
                                         <label for="citologia-images" class="form-label text-white">Subir imágenes</label>
-                                <input type="file" class="form-control" id="citologia-images" name="citologia-images" accept="image/*" multiple required />
+                                        <input type="file" class="form-control" id="citologia-images" name="citologia-images" accept="image/*" multiple required />
                                     </div>
                                 </div>
                                 <br />
@@ -176,6 +177,45 @@
                             </div>
                         </form>
                     </div>
+
+                    <div id="new_segr2" class="collapse" style="margin-top:25px" data-bs-parent="#nueva_citologia">
+                        <form id="form_citologia" action="/upload" method="post" enctype="multipart/form-data" onsubmit="DeshabilitaBoton(event)">
+                            <div class="mb-3">
+                                <div class="row">
+                                   <div class="col-4">
+                                    <label for="citologia-date" class="form-label text-white">Fecha de la citología</label>
+                                    <input type="date" class="form-control" id="citologia-date-2" name="citologia-date" required />
+                                   </div> 
+                                   <div class="col-8">
+                                        <label for="citologia-code" class="form-label text-white">Código de la citología</label>
+                                        <input type="text" class="form-control" id="citologia-code-2" name="citologia-code" value="{{user.usermail}}" readonly/>
+                                   </div>
+                                </div>
+                                <br />
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label for="citologia-lab" class="form-label text-white">Laboratorio</label>
+                                        <input type="text" class="form-control" id="citologia-lab-2" name="citologia-lab"/>
+                                        <button id="btn_crear-2" class="btn w-100" type="submit" style="background-color: #00cc66;color:white;margin-top:10px">Seleccionar la Imagen de la Citologia</button>
+                                    </div>
+                                    <div class="col-8" style="display:flex;flex-direction: row;">
+                                        <label for="ancho" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">Ancho de Célula</label>
+                                        <input class="form-control" id="ancho-2" name="ancho" type="number" value="80" style="max-width:80px;max-height:40px" placeholder="Anchura de celulas" title="Ancho de Célula" required/>
+                                        
+                                        <label for="alto" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">Alto de Célula</label>
+                                        <input class="form-control" id="alto-2" name="alto" type="number" value="80" style="max-width:80px;max-height:40px" placeholder="Altura de celulas" title="Alto de Célula" required/>
+                                        
+                                        <label for="iou_threshold" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">IoU Threshold</label>
+                                        <input class="form-control" id="iou_threshold-2" name="iou_threshold" type="number" value="0.3" step="0.01" max="1" min="0.01" style="max-width:80px;max-height:40px" placeholder="IoU" title="Porcentaje de superposición" required/>
+                                    </div>
+                                </div>
+                                <br />
+                                <!-- CODIGO OCULTO DEL PACIENTE -->
+                                <input type="hidden" class="form-control" id="pacient_id" name="pacient_id" value="{{user.id}}" readonly/>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
             {% endif %}
     

@@ -60,6 +60,12 @@ class RoleEnum(Enum):
     paciente = 'paciente'
     doctor = 'doctor'
 
+class CategoriaEnum(Enum):
+    ascus = 'ascus'
+    altogrado = 'altogrado'
+    bajogrado = 'bajogrado'
+    benigna = 'benigna'
+
 @app.route('/segregar_celulas', methods=['POST'])
 def segregar_celulas():
     def generar_nombre_carpeta(base_path):
@@ -287,6 +293,30 @@ def show_citology_images(cid: int, uid: int):
         # -- Obtener todas las imágenes asociadas a la citología
         imagenes = ImagenCitologia.query.filter_by(citologia_id=cid).all()
 
+        # -- Crear las categorias en un diccionario
+        details_image = {'benigna': 0, 'ascus': 0, 'bajogrado': 0, 'altogrado': 0}
+        for im in imagenes:
+            cat = im.categoria.value
+            details_image[cat] += 1
+
+        # -- Determinar el total de imagenes en cada categoria
+        total_imagenes = len(imagenes)
+
+        # -- Aplicar porcentaje de observacion por categoria
+        copy_details = details_image.copy()
+
+        # -- Usar tabulaciones y anchos fijos en las variables
+        resume = "categoria|conteo(#)|porcentaje(%)"
+        for cat_name in copy_details.keys():
+            total = details_image.get(cat_name)
+            percent = round((total / total_imagenes) * 100, 2)
+            cat_n = cat_name.ljust(9, ' ')
+            total_img = str(total).ljust(9, ' ')
+            percent_image = (str(percent) + '%').ljust(13, ' ')
+            resume += f"\n{cat_n}|{total_img}|{percent_image}"
+        t_img = str(total_imagenes).ljust(9, ' ')
+        resume += f'\ntotal    |{t_img}|100%     '
+
         if not imagenes:
             flash('No se han encontrado imágenes para esta citología', 'error')
             return redirect(url_for('get_pacient_list'))
@@ -298,6 +328,7 @@ def show_citology_images(cid: int, uid: int):
                                pacient_user=pacient_user,
                                edad_paciente=pacient_user.calcular_edad(),
                                observacion=citologia.observacion,
+                               resume=resume,
                                cid=cid,
                                uid=uid)
 
