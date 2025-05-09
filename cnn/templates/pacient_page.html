@@ -102,7 +102,7 @@
             {% if user_role == "doctor" %}
                 <script>
                     function DeshabilitaBoton(event) {
-                        event.preventDefault(); 
+                        event.preventDefault();
                         var form = document.getElementById("form_citologia");
                         var ele = document.getElementById("btn_crear");
                         ele.disabled=true;
@@ -111,7 +111,18 @@
                     function submitForm() {
                         var form = document.getElementById("form_segrega");
                         form.submit();
-                        alert('La citologia se ha segregado en células con éxito!');                    }
+                        alert('La citologia se ha segregado en células con éxito!');                    
+                    }
+
+                    function submitFormSegCls() {
+                        var form = document.getElementById("form_seg_cls");
+
+                        /* Ocultar el LABEL(button)*/
+                        var ele2 = document.getElementById("btn_crear-2");
+                        ele2.style.display = 'none';
+
+                        form.submit();             
+                    }
                 </script>
 
                 <div class="container-fluid" id="nueva_citologia" name="nueva_citologia">
@@ -120,8 +131,8 @@
                     <button class="btn btn-info bnt-sm" data-bs-toggle="collapse" data-bs-target="#new_segr" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Detectar Células</b></button>
                     <button class="btn btn-info bnt-sm" data-bs-toggle="collapse" data-bs-target="#new_segr2" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white"><b>Detectar y Clasificar Células</b></button>
 
-                    <div id="new_segr" class="collapse" style="margin-top:25px" data-bs-parent="#nueva_citologia">
-                        <form id="form_segrega" action="/segregar_celulas" method="post" enctype="multipart/form-data" style="display: inline;">
+                    <div id="new_segr" class="collapse" style="margin-top:20px" data-bs-parent="#nueva_citologia">
+                        <form id="form_segrega" action="/segregar_celulas" method="post" enctype="multipart/form-data" style="display: inline;" >
                             <div style="display:flex;flex-direction: row;">
                                 <input type="file" id="cell-image" name="cell-image" accept="image/*" style="display: none;" onchange="submitForm()">
                                 <label for="cell-image" class="btn bnt-sm" style="--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white; cursor: pointer;background-color: #00cc66;">
@@ -137,7 +148,7 @@
                                 <input class="form-control" id="alto" name="alto" type="number" value="80" style="max-width:80px" placeholder="Altura de celulas" title="Alto de Célula" required/>
                                 
                                 <label for="iou_threshold" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">IoU Threshold</label>
-                                <input class="form-control" id="iou_threshold" name="iou_threshold" type="number" value="0.3" step="0.01" max="1" min="0.01" style="max-width:80px" placeholder="IoU" title="Porcentaje de superposición" required/>
+                                <input class="form-control" id="iou_threshold" name="iou_threshold" type="number" value="0.15" step="0.01" max="1" min="0.01" style="max-width:80px" placeholder="IoU" title="Porcentaje de superposición" required/>
                                 
                             </div>
 
@@ -146,7 +157,7 @@
                         </form>
                     </div>
 
-                    <div id="new_cit" class="collapse" style="margin-top:25px" data-bs-parent="#nueva_citologia">
+                    <div id="new_cit" class="collapse" style="margin-top:20px" data-bs-parent="#nueva_citologia">
                         <form id="form_citologia" action="/upload" method="post" enctype="multipart/form-data" onsubmit="DeshabilitaBoton(event)">
                             <div class="mb-3">
                                 <div class="row">
@@ -164,6 +175,7 @@
                                     <div class="col-4">
                                         <label for="citologia-lab" class="form-label text-white">Laboratorio</label>
                                         <input type="text" class="form-control" id="citologia-lab" name="citologia-lab"/>
+                                        <button id="btn_crear" class="btn w-100" type="submit" style="margin-top:20px;width:100%;font-weight: bold;background-color: #00cc66;color:white">Crear Diagnóstico</button>
                                     </div>
                                     <div class="col-8">
                                         <label for="citologia-images" class="form-label text-white">Subir imágenes</label>
@@ -173,40 +185,44 @@
                                 <br />
                                 <!-- CODIGO OCULTO DEL PACIENTE -->
                                 <input type="hidden" class="form-control" id="pacient_id" name="pacient_id" value="{{user.id}}" readonly/>
-                                <button id="btn_crear" class="btn w-100" type="submit" style="max-width: 100px;background-color: #00cc66;color:white">Crear</button>
+                                
                             </div>
                         </form>
                     </div>
 
-                    <div id="new_segr2" class="collapse" style="margin-top:25px" data-bs-parent="#nueva_citologia">
-                        <form id="form_citologia" action="/upload" method="post" enctype="multipart/form-data" onsubmit="DeshabilitaBoton(event)">
+                    <div id="new_segr2" class="collapse" style="margin-top:20px" data-bs-parent="#nueva_citologia">
+                        <form id="form_seg_cls" action="/segregar_clasificar_celulas" method="post" enctype="multipart/form-data" onsubmit="DeshabilitaBoton(event)">
                             <div class="mb-3">
                                 <div class="row">
                                    <div class="col-4">
-                                    <label for="citologia-date" class="form-label text-white">Fecha de la citología</label>
-                                    <input type="date" class="form-control" id="citologia-date-2" name="citologia-date" required />
+                                    <label for="citologia-date-2" class="form-label text-white">Fecha de la citología</label>
+                                    <input type="date" class="form-control" id="citologia-date-2" name="citologia-date-2" required />
                                    </div> 
                                    <div class="col-8">
-                                        <label for="citologia-code" class="form-label text-white">Código de la citología</label>
-                                        <input type="text" class="form-control" id="citologia-code-2" name="citologia-code" value="{{user.usermail}}" readonly/>
+                                        <label for="citologia-code-2" class="form-label text-white">Código de la citología</label>
+                                        <input type="text" class="form-control" id="citologia-code-2" name="citologia-code-2" value="{{user.usermail}}" readonly/>
                                    </div>
                                 </div>
                                 <br />
                                 <div class="row">
                                     <div class="col-4">
-                                        <label for="citologia-lab" class="form-label text-white">Laboratorio</label>
-                                        <input type="text" class="form-control" id="citologia-lab-2" name="citologia-lab"/>
-                                        <button id="btn_crear-2" class="btn w-100" type="submit" style="background-color: #00cc66;color:white;margin-top:10px">Seleccionar la Imagen de la Citologia</button>
+                                        <label for="citologia-lab-2" class="form-label text-white">Laboratorio</label>
+                                        <input type="text" class="form-control" id="citologia-lab-2" name="citologia-lab-2"/>
+                                        <input type="file" id="cell-image-2" name="cell-image-2" accept="image/*" style="display: none;" onchange="submitFormSegCls()">
+                                        <label id="btn_crear-2" for="cell-image-2" class="btn bnt-sm" style="margin-top:20px;width:100%;--bs-btn-bg: rgb(0,0,30);--bs-btn-border-color: rgb(0,0,30);--bs-btn-hover-bg: rgb(0,0,100);--bs-btn-hover-border-color: rgb(0,0,100);color:white; cursor: pointer;background-color: #00cc66;">
+                                            <b>Seleccionar la Imagen de la Citologia</b>
+                                        </label>
+                                        <!--<button id="btn_crear-2" class="btn w-100" type="submit" style="background-color: #00cc66;color:white;margin-top:10px">Seleccionar la Imagen de la Citologia</button>-->
                                     </div>
                                     <div class="col-8" style="display:flex;flex-direction: row;">
-                                        <label for="ancho" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">Ancho de Célula</label>
-                                        <input class="form-control" id="ancho-2" name="ancho" type="number" value="80" style="max-width:80px;max-height:40px" placeholder="Anchura de celulas" title="Ancho de Célula" required/>
+                                        <label for="ancho-2" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">Ancho de Célula</label>
+                                        <input class="form-control" id="ancho-2" name="ancho-2" type="number" value="80" style="max-width:80px;max-height:40px" placeholder="Anchura de celulas" title="Ancho de Célula" required/>
                                         
-                                        <label for="alto" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">Alto de Célula</label>
-                                        <input class="form-control" id="alto-2" name="alto" type="number" value="80" style="max-width:80px;max-height:40px" placeholder="Altura de celulas" title="Alto de Célula" required/>
+                                        <label for="alto-2" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">Alto de Célula</label>
+                                        <input class="form-control" id="alto-2" name="alto-2" type="number" value="80" style="max-width:80px;max-height:40px" placeholder="Altura de celulas" title="Alto de Célula" required/>
                                         
-                                        <label for="iou_threshold" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">IoU Threshold</label>
-                                        <input class="form-control" id="iou_threshold-2" name="iou_threshold" type="number" value="0.3" step="0.01" max="1" min="0.01" style="max-width:80px;max-height:40px" placeholder="IoU" title="Porcentaje de superposición" required/>
+                                        <label for="iou_threshold-2" class="form-label text-white" style="margin-left:10px;margin-right:10px;font-weight:bold;color:#ffffff !important">IoU Threshold</label>
+                                        <input class="form-control" id="iou_threshold-2" name="iou_threshold-2" type="number" value="0.15" step="0.01" max="1" min="0.01" style="max-width:80px;max-height:40px" placeholder="IoU" title="Porcentaje de superposición" required/>
                                     </div>
                                 </div>
                                 <br />
@@ -219,7 +235,7 @@
                 </div>
             {% endif %}
     
-            <div class="container-fluid" style="margin-top:25px">
+            <div class="container-fluid" style="margin-top:20px">
                 <div class="table-responsive">
                     <table class="table table-hover table-stripped table-light table-borderless">
                         <thead class="table-primary">

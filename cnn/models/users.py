@@ -16,7 +16,6 @@ class CategoriaEnum(Enum):
     bajogrado = 'bajogrado'
     benigna = 'benigna'
 
-
 class User(db.Model, UserMixin):
     '''
     Datos de usuarios
@@ -61,7 +60,8 @@ class Citologia(db.Model):
     diagnostico = db.Column(db.String(255), nullable=True)
     laboratorio = db.Column(db.String(255), default="-", nullable=True)
     observacion = db.Column(db.Text, nullable=True, default="-", comment="Observaciones adicionales")
-    
+    #resume = db.Column(db.Text, nullable=True, default="-", comment="Resumen")
+
     # -- Relaciones
     user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('citologias_paciente', lazy=True))
     doctor = db.relationship('User', foreign_keys=[doctor_id], backref=db.backref('citologias_doctor', lazy=True))

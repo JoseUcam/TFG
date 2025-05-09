@@ -99,6 +99,37 @@ class CNNModel(object):
         with open(path, 'rb') as f:
             return pickle.load(f)
 
+
+    @staticmethod
+    def cargar_imagenes(path):
+        image = tf.io.read_file(path)
+        image = tf.image.decode_jpeg(image, channels=3)  # Leer imagen
+        image = tf.image.resize(image, (CNNModel.IMAGE_SIZE, CNNModel.IMAGE_SIZE))    # Cambiar tamaño
+        image = tf.cast(image, tf.uint8)
+        #image = tf.expand_dims(image, axis=0)
+        return image
+
+    @staticmethod
+    def crear_dataset(rutas_imagenes, batch_size):
+        # Cargar imágenes
+        dataset = tf.data.Dataset.from_tensor_slices(rutas_imagenes)
+
+        # Cargar datos
+        AUTOTUNE = tf.data.AUTOTUNE
+        dataset = dataset.map(CNNModel.cargar_imagenes, num_parallel_calls=AUTOTUNE)
+
+        # Particionar data en lotes y uso de prefetch para acelerar el cargado de datos
+        dataset = dataset.batch(batch_size, drop_remainder=False)
+        dataset = dataset.prefetch(AUTOTUNE)
+        return dataset
+
+    @staticmethod
+    def categorizador_lotes(model, paths, batch_size=128):
+        test_ds = CNNModel.crear_dataset(paths, batch_size)
+        predictions = model.predict(test_ds)
+        return predictions.argmax(axis=-1) , predictions.max(-1)
+
+
 def diagnosticar(modelo:object, predictor:dict, file_path:str):
     '''
     Categorizar la imagen con el modelo
@@ -110,6 +141,22 @@ def diagnosticar(modelo:object, predictor:dict, file_path:str):
         return {'prediccion': predictor[cat_id].lower(), 'probabilidad':max_val, 'status':True, 'message':'OK'}
     except Exception as e:
         return {'prediccion': 'Ocurrió un error al procesar la imagen', 'probabilidad':0, 'status': False, 'message':str(e)}
+
+def diagnosticar_lotes(modelo:object, predictor:dict, paths:str, batch_size=64):
+    '''
+    Categorizar imágenes con el modelo
+    '''
+    print('Categorizando imágenes ...')
+    # -- Realizar la predicción
+    try:
+        cat_ids, max_vals = CNNModel.categorizador_lotes(modelo, rutas, batch_size)
+        predictions = []
+        for cat_id, max_val in zip(cat_ids, max_vals):
+            predictions.append({'prediccion': predictor[cat_id].lower(), 'probabilidad':max_val, 'status':True, 'message':'OK'})
+        return predictions
+    except Exception as e:
+        return [{'prediccion': 'Ocurrió un error al procesar las imagenes', 'probabilidad':0, 'status': False, 'message':str(e)}]
+
 
 if __name__ == '__main__':
     #cnn = CNNModel()
@@ -124,7 +171,11 @@ if __name__ == '__main__':
     print(f'Predictor: {predictor}')
     print(f'Modelo: {modelo}')
 
-    result = diagnosticar(modelo, predictor, "D:\\Celulas\\entrenamiento\\altogrado\\altogrado.00061.tiff")
+    #result = diagnosticar(modelo, predictor, "C:\\Users\\migue\\Dropbox\\PC\\Desktop\\1 CELULAS DETECTADAS\\celulas_2025-04-22_12-08-06\\celula_0.jpeg")
+    #print(result)
+    
+    rutas = ["C:\\Users\\migue\\Dropbox\\PC\\Desktop\\1 CELULAS DETECTADAS\\celulas_2025-04-22_12-08-06\\celula_0.jpeg"]
+    result = diagnosticar_lotes(modelo, predictor, rutas)
     print(result)
     """
     urls = ['./Celulas/test/altogrado/altogrado.00097.tiff',

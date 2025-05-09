@@ -66,6 +66,181 @@ class CategoriaEnum(Enum):
     bajogrado = 'bajogrado'
     benigna = 'benigna'
 
+
+@app.route('/segregar_clasificar_celulas', methods=['POST'])
+@login_required
+def segregar_clasificar_celulas():
+    '''
+    Captura y almacena los datos de la citología con múltiples imágenes
+    '''
+    def diagnosticar_lotes(modelo:object, predictor:dict, paths:str, batch_size=64):
+        '''
+        Categorizar imágenes con el modelo
+        '''
+        print('Categorizando imágenes ...')
+        # -- Realizar la predicción
+        try:
+            cat_ids, max_vals = CNNModel.categorizador_lotes(modelo, rutas, batch_size)
+            predictions = []
+            for cat_id, max_val in zip(cat_ids, max_vals):
+                predictions.append({'prediccion': predictor[cat_id].lower(), 'probabilidad':max_val, 'status':True, 'message':'OK'})
+            return predictions
+        except Exception as e:
+            return [{'prediccion': 'Ocurrió un error al procesar las imagenes', 'probabilidad':0, 'status': False, 'message':str(e)}]
+
+    def diagnosticar(modelo:object, predictor:dict, file_path:str):
+        '''
+        Categorizar la imagen con el modelo
+        '''
+
+        print('Categorizando ' + fr'{file_path}' + '...')
+        # -- Realizar la predicción
+        try:
+            cat_id, max_val = CNNModel.categorizador_local(model=modelo, path=fr'{file_path}')
+            return {'prediccion': predictor[cat_id].lower(), 'probabilidad':max_val, 'status':True, 'message':'OK'}
+        except Exception as e:
+            return {'prediccion': 'Ocurrió un error al procesar la imagen', 'probabilidad':0, 'status': False, 'message':str(e)}
+
+    print("Segregando y clasificando citologias")
+    try:
+        # -- Capturar campos de citologia --
+        fecha = request.form.get('citologia-date-2')
+        codigo = request.form.get('citologia-code-2')
+        #files = request.files.getlist('citologia-image2')
+        laboratorio = request.form.get('citologia-lab-2')
+        pacient_id = request.form.get('pacient_id')
+
+        # -- Capturar campos de configuración de detector --
+        ancho = int(request.form.get('ancho-2'))
+        alto = int(request.form.get('alto-2'))
+        iou_threshold = float(request.form.get('iou_threshold-2'))
+
+        if 'cell-image-2' not in request.files:
+            flash('No se seleccionó ninguna imagen', 'error')
+            return redirect(url_for('get_pacient_page'))
+
+        file = request.files['cell-image-2']
+        
+        if file.filename == '':
+            flash('No se seleccionó ninguna imagen', 'error')
+            return redirect(url_for('get_pacient_page'))
+
+        if not fecha or not codigo or not file:
+            flash('Todos los campos son obligatorios', 'error')
+            return render_template('404.html', message="Todos los campos son obligatorios", user_role=current_user.role.value)
+
+        # -- Crear el nombre de la carpeta donde se alojaran las imagenes del usuario
+        code_name = codigo.replace('@', '_').replace('.', '_').upper() + '_' + str(fecha).replace('-', '_')
+        pacient_folder = os.path.join(app.config['UPLOAD_PATH'], code_name)
+
+        # -- Crear la carpeta si no existe
+        os.makedirs(pacient_folder, exist_ok=True)
+
+        # -- Crear el objeto Citologia sin imágenes aún
+        new_citologia = Citologia(
+            user_id=int(pacient_id),
+            doctor_id=current_user.id,
+            folder=pacient_folder,
+            fecha=fecha,
+            diagnostico='N/A',
+            laboratorio=laboratorio
+        )
+
+        db.session.add(new_citologia)
+        # -- Confirmar la citología antes de asociar imágenes
+        db.session.commit()
+
+        print('Cargando modelo y predictor...')
+        # -- Cargar el modelo y el predictor
+
+        predictor = CNNModel.get_predictor(path=APP_PREDICTOR_NAME)
+        modelo = CNNModel.load_model(path=APP_MODEL_NAME)
+
+        print(f'Ruta de modelo: {APP_MODEL_NAME}')
+        print(f'Predictor: {predictor}')
+        print(f'Modelo: {modelo}')
+
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(pacient_folder, filename)
+            real_path = f'uploads/{code_name}/{filename}'
+            file.save(filepath)
+
+			##################### Detección de celulas ##########################
+            print(f'Ruta de imagen para segregar celulas: {filepath}')
+            image = cv2.imread(filepath)
+
+			# Detectar celulas
+            alpha=1.2
+            beta=20
+            kernel_size_blur=(3,3)
+            kernel_size_morph=(3,3)
+            distance_threshold=0.1
+            cell_bbox_size = (ancho, alto)
+            iou_threshold_ = iou_threshold
+            selected_boxes = CellDetector.detect_cells(image, alpha, beta, kernel_size_blur,
+                                          kernel_size_morph, distance_threshold,
+                                          cell_bbox_size, iou_threshold_)
+
+            # Segregar cuadros delimitadores en carpeta
+            cell_output_size = (224, 224)
+            extracted_regions = CellDetector.extract_regions_interest(image, selected_boxes, cell_output_size)
+
+            # Guardar imágenes en ruta de paciente
+            rutas = []
+            real_paths = [] 
+            for num_cell, img_region in enumerate(extracted_regions):
+                img_filename = f'celula_{num_cell}.jpeg'
+                ruta_completa = os.path.join(pacient_folder, img_filename)
+                real_path = f'uploads/{code_name}/{img_filename}'
+                #rutas.append(ruta.replace('\\', '/'))
+                rutas.append(ruta_completa)
+                real_paths.append(real_path)
+                cv2.imwrite(ruta_completa, img_region)
+            print("Celulas segregadas con exito")
+            #print(rutas)
+
+
+            ##################### Diagnosticar imágenes ##########################
+            results = diagnosticar_lotes(modelo, predictor, rutas)
+            #print(results)
+            if len(results) > 0 and results[0].get('status') == False:
+                return render_template('notification.html', message=f'Error al procesar las imagenes: {results[0].get("message")}')
+
+			# -- Guardar la imagenes en la base de datos
+            for real_path, result in zip(real_paths, results):
+                print(result)
+                if result.get('status') == False:
+                    continue
+                _image = ImagenCitologia(
+					citologia_id=new_citologia.id,
+					image_path=real_path,
+					image_name=real_path.split('/')[-1],
+					categoria=result.get('prediccion') if result.get('status') else None,
+					probabilidad=round( float(result.get('probabilidad')), 6)
+				)
+                
+                db.session.add(_image)
+
+        # -- Confirmar todas las imágenes en la BD
+        db.session.commit()
+
+        flash('Citologías guardadas con éxito', 'success')
+        return redirect(url_for('get_pacient_page', uid=pacient_id))
+
+    except Exception as e:
+        db.session.rollback()  # Revertir cambios en caso de error
+        flash(f'Error al subir la citología: {str(e)}', 'error')
+        return render_template('notification.html', message=f'Error al subir la citología: {str(e)}')
+
+
+
+
+
+
+
+
 @app.route('/segregar_celulas', methods=['POST'])
 def segregar_celulas():
     def generar_nombre_carpeta(base_path):
